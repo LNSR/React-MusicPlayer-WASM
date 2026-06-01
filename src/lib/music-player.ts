@@ -8,6 +8,30 @@ export function getTrackArtistLabel(track: Pick<Track, 'artist'>) {
   return track.artist?.trim() || 'Unknown artist'
 }
 
+export function getTrackArtistStatusLabel(
+  track: Pick<Track, 'artist' | 'artistStatus'>,
+) {
+  if (track.artist?.trim()) {
+    return track.artist
+  }
+
+  if (track.artistStatus === 'empty') {
+    return 'Unknown artist'
+  }
+
+  if (track.artistStatus === 'error') {
+    return 'Artist unavailable'
+  }
+
+  return 'Loading artist'
+}
+
+export function isTrackArtistLoading(
+  track: Pick<Track, 'artist' | 'artistStatus'>,
+) {
+  return !track.artist?.trim() && track.artistStatus !== 'empty' && track.artistStatus !== 'error'
+}
+
 export interface Capability {
   label: string
   supported: boolean

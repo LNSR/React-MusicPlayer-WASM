@@ -25,12 +25,12 @@ import { LibraryPanel } from "@/components/features/music/LibraryPanel";
 import { MobileLibraryTabs } from "@/components/features/music/MobileLibraryTabs";
 import { PlayerBar } from "@/components/features/music/PlayerBar";
 import { SearchBox } from "@/components/features/music/SearchBox";
+import { TrackArtistLabel } from "@/components/features/music/TrackArtistLabel";
 import { TrackCover } from "@/components/features/music/TrackCover";
 import { TrackTable } from "@/components/features/music/TrackTable";
 import { UnsupportedRuntime } from "@/components/features/music/UnsupportedRuntime";
 import {
   formatTime,
-  getTrackArtistLabel,
   getTrackDisplayName,
   MAX_LIBRARY_WIDTH,
   MIN_LIBRARY_WIDTH,
@@ -39,10 +39,8 @@ import {
   useActiveTrack,
   useFilteredTracks,
 } from "@/hooks/music-runtime/useMusicSelectors";
-import {
-  MusicRuntimeProvider,
-  useMusicRuntimeContext,
-} from "@/context/AppContext/useMusicRuntimeContext";
+import { MusicRuntimeProvider } from "@/context/AppContext/MusicRuntimeProvider";
+import { useMusicRuntimeContext } from "@/context/AppContext/useMusicRuntimeContext";
 import { useMusicRuntime } from "@/hooks/useMusicRuntime";
 import { useMusicAppStore } from "@/stores/useMusicAppStore";
 
@@ -95,7 +93,9 @@ export default function App() {
   if (!isSupported) {
     return (
       <TooltipProvider>
-        <UnsupportedRuntime />
+        <MusicRuntimeProvider value={runtimeContextValue}>
+          <UnsupportedRuntime />
+        </MusicRuntimeProvider>
         <Toaster richColors closeButton />
       </TooltipProvider>
     );
@@ -291,9 +291,16 @@ function PlaylistHero() {
         <h1 className="music-wrap-text mt-2 max-w-5xl text-4xl font-black leading-tight tracking-normal sm:text-5xl lg:text-6xl">
           {activeTrack ? getTrackDisplayName(activeTrack) : "Local Files"}
         </h1>
-        <p className="music-wrap-text mt-2 max-w-4xl text-sm font-medium text-white/80">
-          {activeTrack ? getTrackArtistLabel(activeTrack) : "Unknown artist"}
-        </p>
+        {activeTrack ? (
+          <TrackArtistLabel
+            track={activeTrack}
+            className="mt-2 max-w-4xl text-sm font-medium text-white/80"
+          />
+        ) : (
+          <p className="music-wrap-text mt-2 max-w-4xl text-sm font-medium text-white/80">
+            No artist loaded
+          </p>
+        )}
         <p className="music-wrap-text mt-3 max-w-5xl text-sm leading-6 text-white/70">
           {activeTrack?.relativePath ??
             (scanProgress ||

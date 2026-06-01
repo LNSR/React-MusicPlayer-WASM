@@ -18,8 +18,9 @@ import { useActiveTrack } from "@/hooks/music-runtime/useMusicSelectors";
 import { useMusicRuntimeContext } from "@/context/AppContext/useMusicRuntimeContext";
 import {
   formatTime,
-  getTrackArtistLabel,
+  getTrackArtistStatusLabel,
   getTrackDisplayName,
+  isTrackArtistLoading,
 } from "@/lib/music-player";
 import { useMusicAppStore } from "@/stores/useMusicAppStore";
 import { useShallow } from "zustand/react/shallow";
@@ -49,6 +50,8 @@ export function PlayerBar() {
   );
 
   const volumePercentage = Math.round(volume * 100);
+  const artistLabel = track ? getTrackArtistStatusLabel(track) : "";
+  const artistLoading = track ? isTrackArtistLoading(track) : false;
 
   const { playNext, playPrevious, seekTo, setVolume, togglePlayback } =
     useMusicRuntimeContext();
@@ -66,11 +69,18 @@ export function PlayerBar() {
             <p className="truncate text-sm font-medium leading-5 text-white">
               {track ? getTrackDisplayName(track) : "No track selected"}
             </p>
-            <Marquee className="text-xs leading-4 text-white/70">
-              {track
-                ? getTrackArtistLabel(track)
-                : `${queueLength} tracks in library`}
-            </Marquee>
+            {track ? (
+              <span className="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-white/70">
+                {artistLoading ? (
+                  <Loader2 className="size-3 shrink-0 animate-spin" />
+                ) : null}
+                <Marquee title={artistLabel}>{artistLabel}</Marquee>
+              </span>
+            ) : (
+              <Marquee className="text-xs leading-4 text-white/70">
+                {`${queueLength} tracks in library`}
+              </Marquee>
+            )}
           </div>
           <Badge variant="outline" className="border-white/10 text-white/70">
             {Math.round(volume * 100)}%
@@ -147,11 +157,18 @@ export function PlayerBar() {
           <p className="truncate text-sm font-medium leading-5 text-white">
             {track ? getTrackDisplayName(track) : "No track selected"}
           </p>
-          <Marquee className="text-xs leading-4 text-white/70">
-            {track
-              ? getTrackArtistLabel(track)
-              : `${queueLength} tracks in library`}
-          </Marquee>
+          {track ? (
+            <span className="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-white/70">
+              {artistLoading ? (
+                <Loader2 className="size-3 shrink-0 animate-spin" />
+              ) : null}
+              <Marquee title={artistLabel}>{artistLabel}</Marquee>
+            </span>
+          ) : (
+            <Marquee className="text-xs leading-4 text-white/70">
+              {`${queueLength} tracks in library`}
+            </Marquee>
+          )}
         </div>
       </div>
 

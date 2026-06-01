@@ -1,4 +1,6 @@
 import { useRef } from 'react'
+import { LRUCache } from 'lru-cache'
+import { useMusicAppStore } from '@/stores/useMusicAppStore'
 
 interface CoverImage {
   mimeType: string
@@ -6,23 +8,29 @@ interface CoverImage {
 }
 
 export function useCoverUrls() {
-  const coverUrlsRef = useRef<Map<string, string> | null>(null)
+  const coverUrlsRef = useRef<LRUCache<string, string> | null>(null)
 
   if (coverUrlsRef.current === null) {
-    coverUrlsRef.current = new Map<string, string>()
+    coverUrlsRef.current = new LRUCache<string, string>({
+      max: 384,
+      dispose: (coverUrl, trackId) => {
+        URL.revokeObjectURL(coverUrl)
+
+        const { patchTrack, tracks } = useMusicAppStore.getState()
+        const track = tracks.find((candidate) => candidate.id === trackId)
+
+        if (track?.coverUrl === coverUrl) {
+          patchTrack(trackId, { coverUrl: undefined })
+        }
+      },
+    })
   }
 
   const coverUrls = coverUrlsRef.current
 
   function applyCoverImage(trackId: string, coverImage?: CoverImage) {
-    const existingCoverUrl = coverUrls.get(trackId)
-
     if (!coverImage) {
-      return existingCoverUrl
-    }
-
-    if (existingCoverUrl) {
-      URL.revokeObjectURL(existingCoverUrl)
+      return coverUrls.get(trackId)
     }
 
     const nextCoverUrl = URL.createObjectURL(
@@ -33,9 +41,6 @@ export function useCoverUrls() {
   }
 
   function revokeAllCoverUrls() {
-    for (const coverUrl of coverUrls.values()) {
-      URL.revokeObjectURL(coverUrl)
-    }
     coverUrls.clear()
   }
 

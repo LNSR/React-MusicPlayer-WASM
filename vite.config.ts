@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, normalizePath } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
-import type { Plugin, ResolvedConfig, UserConfig } from 'vite'
+import type { Plugin, ResolvedConfig, ServerOptions, UserConfig } from 'vite'
 
 
 const headers = {
@@ -14,6 +14,7 @@ const headers = {
   'Cross-Origin-Resource-Policy': 'same-origin',
 }
 
+const dev = process.env['NODE_ENV'] === 'development'
 const audioWorkletQuery = '?worklet'
 const audioWorkletIdPrefix = '\0audio-worklet:'
 
@@ -84,6 +85,11 @@ function audioWorkletPlugin(): Plugin
   }
 }
 
+const https: ServerOptions['https'] = dev ? {
+  key: readFileSync(new URL('./localhost-key.pem', import.meta.url)),
+  cert: readFileSync(new URL('./localhost.pem', import.meta.url)),
+} : undefined
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -98,10 +104,7 @@ export default defineConfig({
     },
   },
   server: {
-    https: {
-      key: readFileSync(new URL('./localhost-key.pem', import.meta.url)),
-      cert: readFileSync(new URL('./localhost.pem', import.meta.url)),
-    },
+    https: { ...https },
     hmr: { protocol: 'wss', clientPort: 9991, port: 9991 },
     headers: {
       ...headers,

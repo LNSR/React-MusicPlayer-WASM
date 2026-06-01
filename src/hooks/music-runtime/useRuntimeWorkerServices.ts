@@ -1,4 +1,5 @@
 import type { PendingAutoplayRef } from '@/types/audio'
+import { useMusicAppStore } from '@/stores/useMusicAppStore'
 import { useAudioRuntime } from './useAudioRuntime'
 import { useCoverUrls } from './useCoverUrls'
 import { useLibraryWorker } from './useLibraryWorker'
@@ -43,6 +44,21 @@ export function useRuntimeWorkerServices({
 
   function preloadTrackMetadata(trackIds: string[]) {
     if (trackIds.length > 0) {
+      const { patchTrack, tracks } = useMusicAppStore.getState()
+      const trackIdsToMark = new Set(trackIds)
+
+      for (const track of tracks) {
+        if (
+          trackIdsToMark.has(track.id) &&
+          !track.artist &&
+          track.artistStatus !== 'loading' &&
+          track.artistStatus !== 'loaded' &&
+          track.artistStatus !== 'empty'
+        ) {
+          patchTrack(track.id, { artistStatus: 'loading' })
+        }
+      }
+
       postToMetadataWorker({ type: 'preloadTrackMetadata', trackIds })
     }
   }

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   formatTime,
-  getTrackArtistLabel,
   getTrackDisplayName,
   getVisualizerBars,
 } from '@/lib/music-player'
@@ -18,6 +17,7 @@ import { useMusicRuntimeContext } from '@/context/AppContext/useMusicRuntimeCont
 import { useMusicAppStore } from '@/stores/useMusicAppStore'
 import { LibraryStat, MiniLibrary } from './LibraryPanel'
 import { SearchBox } from './SearchBox'
+import { TrackArtistLabel } from './TrackArtistLabel'
 import { TrackCover } from './TrackCover'
 
 export function MobileLibraryTabs() {
@@ -116,9 +116,16 @@ function MobileNowPlayingCard() {
           <h3 className="music-wrap-text mt-2 text-lg font-bold leading-snug text-white">
             {track ? getTrackDisplayName(track) : 'No track loaded'}
           </h3>
-          <p className="music-wrap-text mt-1 text-sm text-primary/90">
-            {track ? getTrackArtistLabel(track) : 'Unknown artist'}
-          </p>
+          {track ? (
+            <TrackArtistLabel
+              track={track}
+              className="mt-1 text-sm text-primary/90"
+            />
+          ) : (
+            <p className="music-wrap-text mt-1 text-sm text-primary/90">
+              No artist loaded
+            </p>
+          )}
         </div>
         <Badge variant={status === 'error' ? 'warning' : 'secondary'}>
           {status}
@@ -183,9 +190,10 @@ function MobileNowPlayingCard() {
                 <span className="block truncate text-sm text-white">
                   {getTrackDisplayName(queuedTrack)}
                 </span>
-                <span className="block truncate text-xs text-white/80">
-                  {getTrackArtistLabel(queuedTrack)}
-                </span>
+                <TrackArtistLabel
+                  track={queuedTrack}
+                  className="text-xs text-white/80"
+                />
               </span>
               <span className="text-xs text-muted-foreground">
                 {queuedTrack.duration ? formatTime(queuedTrack.duration) : '--:--'}

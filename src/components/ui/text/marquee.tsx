@@ -11,7 +11,7 @@ interface MarqueeProps {
 export default function Marquee({
   children,
   className,
-  pixelsPerSecond = 25,
+  pixelsPerSecond = 30,
   title,
 }: MarqueeProps) {
   const containerRef = useRef<HTMLSpanElement | null>(null);
@@ -29,12 +29,14 @@ export default function Marquee({
     }
 
     const updateOverflow = () => {
-      const overflows = text.scrollWidth > container.clientWidth + 1;
+      const containerWidth = container.clientWidth;
+      const textWidth = text.scrollWidth;
+      const overflows = textWidth > containerWidth + 1;
       setIsOverflowing(overflows);
 
       if (overflows) {
         const gap = parseFloat(getComputedStyle(inner).columnGap) || 0;
-        const distance = text.scrollWidth + gap;
+        const distance = textWidth + gap;
         const duration = distance / pixelsPerSecond;
 
         inner.style.setProperty("--marquee-distance", `${distance}px`);
@@ -44,7 +46,6 @@ export default function Marquee({
         inner.style.removeProperty("--marquee-duration");
       }
     };
-
     const resizeObserver = new ResizeObserver(updateOverflow);
 
     updateOverflow();
@@ -59,16 +60,16 @@ export default function Marquee({
   return (
     <span
       ref={containerRef}
-      className={cn("music-marquee block min-w-0", className)}
+      className={cn("music-marquee block w-full min-w-0 max-w-full", className)}
       data-overflow={isOverflowing}
       title={title}
     >
       <span ref={innerRef} className="music-marquee-inner">
-        <span ref={textRef} className="min-w-0 truncate">
+        <span ref={textRef} className="music-marquee-item">
           {children}
         </span>
         {isOverflowing ? (
-          <span aria-hidden="true" className="min-w-0">
+          <span aria-hidden="true" className="music-marquee-item">
             {children}
           </span>
         ) : null}

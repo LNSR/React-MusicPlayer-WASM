@@ -1,12 +1,13 @@
 import type { VirtualItem } from '@tanstack/react-virtual'
 import type { RefObject } from 'react'
+import type { TrackRequestCache } from '@/lib/lru-caches'
 import type { Track } from '@/types/audio'
 
 interface RequestVisibleTrackAssetsOptions {
   preloadTrackCovers: (trackIds: string[]) => void
   preloadTrackMetadata: (trackIds: string[]) => void
-  requestedCoverIdsRef: RefObject<Set<string> | null>
-  requestedMetadataIdsRef: RefObject<Set<string> | null>
+  requestedCoverIdsRef: RefObject<TrackRequestCache | null>
+  requestedMetadataIdsRef: RefObject<TrackRequestCache | null>
   tracks: Track[]
   virtualItems: VirtualItem[]
 }
@@ -45,7 +46,13 @@ export function requestVisibleTrackAssets({
       preloadCoverIds.push(track.id)
     }
 
-    if (!track.artist && !requestedMetadataIds.has(track.id)) {
+    if (
+      !track.artist &&
+      track.artistStatus !== 'loading' &&
+      track.artistStatus !== 'loaded' &&
+      track.artistStatus !== 'empty' &&
+      !requestedMetadataIds.has(track.id)
+    ) {
       requestedMetadataIds.add(track.id)
       preloadMetadataIds.push(track.id)
     }
