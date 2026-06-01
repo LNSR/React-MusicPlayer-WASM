@@ -185,18 +185,43 @@ input {
 }
 
 .music-marquee {
+  display: block;
+  max-width: 100%;
   overflow: hidden;
   white-space: nowrap;
 }
 
 .music-marquee-inner {
   display: inline-flex;
-  min-width: max-content;
+  max-width: 100%;
+  min-width: 0;
   gap: 2rem;
+  vertical-align: top;
+  will-change: transform;
+}
+
+.music-marquee-item {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .music-marquee[data-overflow="false"] .music-marquee-inner {
-  max-width: 100%;
+  width: 100%;
+}
+
+.music-marquee[data-overflow="true"] .music-marquee-inner {
+  max-width: none;
+  min-width: max-content;
+}
+
+.music-marquee[data-overflow="true"] .music-marquee-item {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .music-marquee[data-overflow="true"] .music-marquee-inner {
@@ -206,6 +231,13 @@ input {
 @media (prefers-reduced-motion: reduce) {
   .music-marquee[data-overflow="true"] .music-marquee-inner {
     animation: none;
+    min-width: 0;
     max-width: 100%;
+  }
+
+  .music-marquee[data-overflow="true"] .music-marquee-item {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

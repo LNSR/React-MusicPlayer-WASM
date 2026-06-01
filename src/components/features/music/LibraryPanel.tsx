@@ -9,12 +9,13 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   filterTracks,
-  getTrackArtistLabel,
   getTrackDisplayName,
 } from '@/lib/music-player'
+import { createTrackRequestCache, type TrackRequestCache } from '@/lib/lru-caches'
 import { useMusicRuntimeContext } from '@/context/AppContext/useMusicRuntimeContext'
 import { useMusicAppStore } from '@/stores/useMusicAppStore'
 import type { Track } from '@/types/audio'
+import { TrackArtistLabel } from './TrackArtistLabel'
 import { TrackCover } from './TrackCover'
 import { requestVisibleTrackAssets } from '@/hooks/virtualized-track-assets'
 
@@ -133,13 +134,13 @@ export function MiniLibrary({
 }) {
   const { preloadTrackCovers, preloadTrackMetadata } = useMusicRuntimeContext()
   const scrollParentRef = useRef<HTMLDivElement | null>(null)
-  const requestedCoverIdsRef = useRef<Set<string> | null>(null)
-  const requestedMetadataIdsRef = useRef<Set<string> | null>(null)
+  const requestedCoverIdsRef = useRef<TrackRequestCache | null>(null)
+  const requestedMetadataIdsRef = useRef<TrackRequestCache | null>(null)
   if (requestedCoverIdsRef.current === null) {
-    requestedCoverIdsRef.current = new Set()
+    requestedCoverIdsRef.current = createTrackRequestCache()
   }
   if (requestedMetadataIdsRef.current === null) {
-    requestedMetadataIdsRef.current = new Set()
+    requestedMetadataIdsRef.current = createTrackRequestCache()
   }
   // TanStack Virtual exposes imperative helpers that React Compiler cannot memoize.
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -218,9 +219,10 @@ export function MiniLibrary({
                 <span className="block truncate text-sm font-medium">
                   {getTrackDisplayName(track)}
                 </span>
-                <span className="block truncate text-xs text-white/80">
-                  {getTrackArtistLabel(track)}
-                </span>
+                <TrackArtistLabel
+                  track={track}
+                  className="text-xs text-white/80"
+                />
               </span>
             </button>
           )

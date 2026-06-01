@@ -1,4 +1,5 @@
 import type { RefObject } from 'react'
+import type { Remote } from 'comlink'
 export type TrackFormat = 'MP3' | 'WAV' | 'FLAC' | 'OGG' | 'OPUS' | 'M4A' | 'AAC'
 
 export interface Track
@@ -6,6 +7,7 @@ export interface Track
   id: string
   name: string
   artist?: string
+  artistStatus?: 'loading' | 'loaded' | 'empty' | 'error'
   relativePath: string
   size: number
   lastModified: number
@@ -51,11 +53,9 @@ export interface CoverImage
 
 export type AudioRuntimeRef = RefObject<AudioRuntime | null>
 export type PendingAutoplayRef = RefObject<boolean>
-export type WorkerRef = RefObject<Worker | null>
 
 export type PostToMetadataWorker = (message: MetadataWorkerRequest) => void
 export type PostToDecodeWorker = (message: DecodeWorkerRequest) => void
-export type PostToWorker = (message: LibraryWorkerRequest) => void
 export type UpdatePlayer = (updater: (player: PlayerState) => PlayerState) => void
 
 
@@ -79,8 +79,6 @@ export type DecodeWorkerRequest =
   | { type: 'setQueue'; trackIds: string[] }
   | { type: 'seek'; trackId: string; position: number }
 
-export type LibraryWorkerRequest = MetadataWorkerRequest | DecodeWorkerRequest
-
 export type MetadataWorkerResponse =
   | {
     type: 'scanProgress'
@@ -95,7 +93,12 @@ export type MetadataWorkerResponse =
   | {
     type: 'trackMetadataLoaded'
     trackId: string
-    artist?: string
+    artist: string | null
+  }
+  | {
+    type: 'trackMetadataFailed'
+    trackId: string
+    message: string
   }
   | {
     type: 'coverLoaded'
@@ -121,7 +124,40 @@ export type DecodeWorkerResponse =
   }
   | { type: 'decodeError'; trackId?: string; message: string }
 
-export type LibraryWorkerResponse = MetadataWorkerResponse | DecodeWorkerResponse
+export type WorkerMessageHandler<Message> = (
+  message: Message,
+) => Promise<void> | void
+
+export interface MetadataWorkerApi
+{
+  preloadCovers: (trackIds: string[]) => Promise<void>
+  preloadTrackMetadata: (trackIds: string[]) => void
+  scanDirectory: (directoryHandle: FileSystemDirectoryHandle) => Promise<void>
+  setMessageHandler: (
+    handler: WorkerMessageHandler<MetadataWorkerResponse> | undefined,
+  ) => void
+}
+
+export interface DecodeWorkerApi
+{
+  loadTrack: (track: Track) => Promise<void>
+  seek: (trackId: string, position: number) => void
+  setMessageHandler: (
+    handler: WorkerMessageHandler<DecodeWorkerResponse> | undefined,
+  ) => void
+  setQueue: (trackIds: string[]) => void
+}
+
+export interface WorkerClient<Api>
+{
+  api: Remote<Api>
+  worker: Worker
+}
+
+export type MetadataWorkerRef = RefObject<
+  WorkerClient<MetadataWorkerApi> | null
+>
+export type DecodeWorkerRef = RefObject<WorkerClient<DecodeWorkerApi> | null>
 
 export type AudioWorkletRequest =
   | { type: 'initEngine' }

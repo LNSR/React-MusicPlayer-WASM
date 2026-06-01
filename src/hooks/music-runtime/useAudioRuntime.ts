@@ -59,12 +59,15 @@ export function useAudioRuntime({
     }
 
     pendingAutoplayRef.current = true
+    audioRuntimeRef.current?.node.port.postMessage({ type: 'clear' })
     postToDecodeWorker({ type: 'loadTrack', track: nextTrack } satisfies DecodeWorkerRequest)
     updatePlayer((state) => ({
       ...state,
       status: 'loading',
       currentTrackId: nextTrackId,
       position: 0,
+      duration: 0,
+      bufferedRanges: [],
     }))
   }
 

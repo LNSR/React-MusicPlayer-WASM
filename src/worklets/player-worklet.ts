@@ -33,6 +33,7 @@ class MusicPlayerProcessor extends AudioWorkletProcessor {
   private volume = 0.85
   private frameCounter = 0
   private levels: [number, number] = [0, 0]
+  private endedPosted = false
 
   constructor() {
     super()
@@ -51,6 +52,7 @@ class MusicPlayerProcessor extends AudioWorkletProcessor {
         this.duration = 0
         this.playing = false
         this.levels = [0, 0]
+        this.endedPosted = false
         this.post({
           type: 'bufferStatus',
           bufferedRanges: [],
@@ -63,6 +65,8 @@ class MusicPlayerProcessor extends AudioWorkletProcessor {
         this.sourceSampleRate = message.sampleRate
         this.duration = message.duration
         this.position = 0
+        this.playing = false
+        this.endedPosted = false
         this.post({
           type: 'bufferStatus',
           bufferedRanges: [[0, message.duration]],
@@ -71,7 +75,10 @@ class MusicPlayerProcessor extends AudioWorkletProcessor {
       }
 
       if (message.type === 'play') {
-        this.playing = true
+        if (this.channels.length && this.position < this.duration) {
+          this.playing = true
+          this.endedPosted = false
+        }
         return
       }
 
@@ -82,6 +89,7 @@ class MusicPlayerProcessor extends AudioWorkletProcessor {
 
       if (message.type === 'seek') {
         this.position = Math.max(0, Math.min(message.position, this.duration))
+        this.endedPosted = this.position >= this.duration
         return
       }
 
@@ -141,7 +149,10 @@ class MusicPlayerProcessor extends AudioWorkletProcessor {
         right[frame] = 0
         this.playing = false
         this.position = this.duration
-        this.post({ type: 'ended' })
+        if (!this.endedPosted) {
+          this.endedPosted = true
+          this.post({ type: 'ended' })
+        }
         continue
       }
 

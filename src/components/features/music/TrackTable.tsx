@@ -10,11 +10,13 @@ import { useMusicRuntimeContext } from '@/context/AppContext/useMusicRuntimeCont
 import {
   formatBytes,
   formatTime,
-  getTrackArtistLabel,
+  getTrackArtistStatusLabel,
   getTrackDisplayName,
 } from '@/lib/music-player'
+import { createTrackRequestCache, type TrackRequestCache } from '@/lib/lru-caches'
 import { useMusicAppStore } from '@/stores/useMusicAppStore'
 import type { Track } from '@/types/audio'
+import { TrackArtistLabel } from './TrackArtistLabel'
 import { TrackCover } from './TrackCover'
 import { requestVisibleTrackAssets } from '../../../hooks/virtualized-track-assets'
 
@@ -36,13 +38,13 @@ export function TrackTable() {
   )
   const { loadTrack, preloadTrackCovers, preloadTrackMetadata } = useMusicRuntimeContext()
   const scrollParentRef = useRef<HTMLDivElement | null>(null)
-  const requestedCoverIdsRef = useRef<Set<string> | null>(null)
-  const requestedMetadataIdsRef = useRef<Set<string> | null>(null)
+  const requestedCoverIdsRef = useRef<TrackRequestCache | null>(null)
+  const requestedMetadataIdsRef = useRef<TrackRequestCache | null>(null)
   if (requestedCoverIdsRef.current === null) {
-    requestedCoverIdsRef.current = new Set()
+    requestedCoverIdsRef.current = createTrackRequestCache()
   }
   if (requestedMetadataIdsRef.current === null) {
-    requestedMetadataIdsRef.current = new Set()
+    requestedMetadataIdsRef.current = createTrackRequestCache()
   }
   // TanStack Virtual exposes imperative helpers that React Compiler cannot memoize.
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -161,7 +163,7 @@ function CompactTrackRows({
         style={{
           transform: `translateY(${virtualItem.start}px)`,
         }}
-        title={`${getTrackDisplayName(track)} - ${getTrackArtistLabel(track)}`}
+        title={`${getTrackDisplayName(track)} - ${getTrackArtistStatusLabel(track)}`}
       >
         <span className="w-5 shrink-0 text-xs font-semibold text-muted-foreground">
           {virtualItem.index + 1}
@@ -175,9 +177,7 @@ function CompactTrackRows({
           <span className="block truncate font-medium text-white">
             {getTrackDisplayName(track)}
           </span>
-          <span className="mt-0.5 block truncate text-xs text-white/80">
-            {getTrackArtistLabel(track)}
-          </span>
+          <TrackArtistLabel track={track} className="mt-0.5 text-xs text-white/80" />
           <span className="mt-1 block text-[11px] uppercase tracking-[0.12em] text-white/45">
             {track.format} · {formatBytes(track.size)}
           </span>
@@ -214,7 +214,7 @@ function DesktopTrackRows({
         style={{
           transform: `translateY(${virtualItem.start}px)`,
         }}
-        title={`${getTrackDisplayName(track)} - ${getTrackArtistLabel(track)}`}
+        title={`${getTrackDisplayName(track)} - ${getTrackArtistStatusLabel(track)}`}
       >
         <span className="text-muted-foreground">{virtualItem.index + 1}</span>
         <span className="grid min-w-0 grid-cols-[2.75rem_1fr] gap-3">
@@ -227,9 +227,7 @@ function DesktopTrackRows({
             <span className="block truncate font-medium text-white">
               {getTrackDisplayName(track)}
             </span>
-            <span className="block truncate text-xs text-white/80">
-              {getTrackArtistLabel(track)}
-            </span>
+            <TrackArtistLabel track={track} className="text-xs text-white/80" />
           </span>
         </span>
         <span className="hidden text-muted-foreground md:block">

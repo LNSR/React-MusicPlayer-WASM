@@ -9,21 +9,21 @@
     "tasks": [
       {
         "label": "Dev",
-        "command": "bun -b run dev",
+        "command": "bun run dev",
         "type": "shell",
-        "problemMatcher": []
+        "problemMatcher": [],
       },
       {
         "label": "Build",
-        "command": "bun -b run build",
-        "type": "shell"
+        "command": "bun run build",
+        "type": "shell",
       },
       {
         "label": "Preview",
-        "command": "bun -b run preview",
+        "command": "bun run preview",
         "type": "shell",
-        "problemMatcher": []
-      }
+        "problemMatcher": [],
+      },
     ],
   },
   "settings": {
@@ -32,5 +32,8 @@
     "tailwindCSS.experimental.classRegex": [
       ["\\/\\*\\s*tw\\s*\\*\\/\\s*`([^`]*)`"],
     ],
+    "files.associations": {
+      "*.css": "tailwindcss",
+    },
   },
 }
