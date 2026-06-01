@@ -1,0 +1,72 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+bun-debug.log*
+debug.log*
+
+# Dependencies
+node_modules
+.pnp
+.pnp.*
+
+# Build output
+dist
+dist-ssr
+build
+out
+.vite
+.vite-inspect
+*.tsbuildinfo
+
+# Test and coverage output
+coverage
+.nyc_output
+playwright-report
+test-results
+
+# Runtime and cache files
+.cache
+.parcel-cache
+.rollup.cache
+.eslintcache
+.stylelintcache
+.turbo
+.vercel
+.netlify
+
+# Environment and local config
+.env
+.env.*
+!.env.example
+!.env.sample
+*.local
+*.pem
+localhost*.pem
+
+# Local media libraries
+public/music
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Codex / local agent state
+.agents
+*.agents

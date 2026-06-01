@@ -1,0 +1,36 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Dev",
+        "command": "bun -b run dev",
+        "type": "shell",
+        "problemMatcher": []
+      },
+      {
+        "label": "Build",
+        "command": "bun -b run build",
+        "type": "shell"
+      },
+      {
+        "label": "Preview",
+        "command": "bun -b run preview",
+        "type": "shell",
+        "problemMatcher": []
+      }
+    ],
+  },
+  "settings": {
+    "js/ts.tsdk.path": "node_modules/typescript/lib",
+    "tailwindCSS.classFunctions": ["cva"],
+    "tailwindCSS.experimental.classRegex": [
+      ["\\/\\*\\s*tw\\s*\\*\\/\\s*`([^`]*)`"],
+    ],
+  },
+}
